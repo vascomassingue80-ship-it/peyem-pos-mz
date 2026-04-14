@@ -125,21 +125,27 @@ async function init() {
     }
 }
 
+
+
 document.getElementById('btnLogin').addEventListener('click', async () => {
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+    const usuario = document.getElementById('username').value;
+    const senha = document.getElementById('password').value;
+    
     const res = await fetch('/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ usuario, senha })
     });
+    
     const data = await res.json();
+    
     if (res.ok) {
-        token = data.token;
-        localStorage.setItem('pos_token', token);
-        init();
+        localStorage.setItem('pos_token', data.token);
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('appScreen').classList.remove('hidden');
+        document.getElementById('userName').textContent = Olá, ${data.nome};
     } else {
-        document.getElementById('loginMsg').textContent = data.error;
+        alert(data.erro);
     }
 });
 
