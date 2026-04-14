@@ -178,7 +178,7 @@ app.post('/api/logout', checkLogin, (req, res) => {
 // =======================
 // ROTA FRONTEND
 // =======================
-app.get('*', (req, res) => {
+app.get('/*path', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
