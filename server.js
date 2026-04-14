@@ -70,7 +70,7 @@ app.post('/api/sales', checkLogin, (req, res) => {
         const prod = products.find(p => p.id === item.id);
         if (prod) {
             if (prod.stock < item.qtd) {
-                return res.status(400).json({ error: Estoque insuficiente para ${prod.name} });
+                return res.status(400).json({ error: `Estoque insuficiente para ${prod.name}` });
             }
             prod.stock -= item.qtd;
         }
