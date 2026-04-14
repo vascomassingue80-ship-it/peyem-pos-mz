@@ -103,4 +103,4 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => console.log(Servidor Peyem.POS rodando na porta ${PORT}));
+app.listen(PORT, () => console.log(`Servidor Peyem.POS rodando na porta ${PORT}`));
