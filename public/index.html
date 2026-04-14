@@ -108,7 +108,7 @@ async function checkAuth() {
         const res = await fetch('/api/me', { headers: { 'Authorization': token } });
         if (!res.ok) throw new Error();
         const data = await res.json();
-        document.getElementById('userName').textContent = Olá, ${data.name};
+        document.getElementById('userName').textContent = `Olá, ${data.name}`;
         return true;
     } catch {
         localStorage.removeItem('pos_token');
@@ -117,13 +117,13 @@ async function checkAuth() {
     }
 }
 
-async function init() {
-    if (await checkAuth()) {
+//async function init() {
+    //if (await checkAuth()) {
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('appScreen').classList.remove('hidden');
         carregarProdutos();
-    }
-}
+    //}
+//}
 
 document.getElementById('btnLogin').addEventListener('click', async () => {
     const username = document.getElementById('username').value;
@@ -273,7 +273,7 @@ document.getElementById('btnRelatorio').onclick = async () => {
     document.getElementById('modalRelatorio').classList.remove('hidden');
 };
 
-init(); // Inicia o app
+//init(); // Inicia o app
 </script>
 </body>
 </html>
