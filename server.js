@@ -99,8 +99,8 @@ app.get('/api/sales/today', checkLogin, (req, res) => {
 });
 
 // ROTA PADRÃO
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get('/*splat', (req, res) => {
+    res.sendFile(__dirname + '/public/index.html');
 });
 
 app.listen(PORT, () => console.log(`Servidor Peyem.POS rodando na porta ${PORT}`));
