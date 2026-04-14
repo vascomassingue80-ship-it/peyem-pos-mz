@@ -1,285 +1,311 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peyem.POS MZ</title>
-    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
-    <style>
-        * { box-sizing: border-box; }
-        body { font-family: -apple-system, sans-serif; margin: 0; padding: 10px; background: #f5f5f5; }
-      .card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        h1, h3 { margin: 10px 0; }
-        #video { width: 100%; border-radius: 8px; display: none; }
-        button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; margin: 5px 0; font-weight: bold; cursor: pointer; }
-      .btn-blue { background: #007AFF; color: white; }
-      .btn-green { background: #34C759; color: white; }
-      .btn-red { background: #FF3B30; color: white; }
-      .btn-gray { background: #8E8E93; color: white; }
-      .btn-orange { background: #FF9500; color: white; }
-        input, select { width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ddd; border-radius: 8px; margin: 5px 0; }
-      .item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
-      .item-info { flex: 1; }
-      .item-qtd { display: flex; align-items: center; gap: 10px; }
-      .item-qtd button { width: 30px; height: 30px; padding: 0; margin: 0; }
-      .total { font-size: 24px; font-weight: bold; text-align: right; }
-      .msg { font-weight: bold; text-align: center; margin: 10px 0; }
-      .erro { color: #FF3B30; }
-      .sucesso { color: #34C759; }
-      .flex { display: flex; gap: 10px; }
-      .flex > * { flex: 1; }
-      .hidden { display: none; }
-      .login-screen { max-width: 400px; margin: 50px auto; }
-      .header { display: flex; justify-content: space-between; align-items: center; }
-      .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
-      .modal-content { background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; max-height: 80%; overflow-y: auto; }
-       @media print { body * { visibility: hidden; } #recibo, #recibo * { visibility: visible; } #recibo { position: absolute; left: 0; top: 0; width: 100%; } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peyem.POS MZ</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 15px;
+    background: linear-gradient(135deg, #e3f2fd, #ffffff);
+}
+
+.card {
+    background: white;
+    padding: 18px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+h1 { color: #007AFF; }
+
+button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    margin: 5px 0;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover { transform: scale(1.02); }
+
+.btn-blue { background: #007AFF; color: white; }
+.btn-green { background: #34C759; color: white; }
+.btn-red { background: #FF3B30; color: white; }
+.btn-gray { background: #8E8E93; color: white; }
+.btn-orange { background: #FF9500; color: white; }
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin: 5px 0;
+}
+
+input:focus, select:focus {
+    border-color: #007AFF;
+    outline: none;
+}
+
+.flex { display: flex; gap: 10px; }
+.flex > * { flex: 1; }
+
+.hidden { display: none; }
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.total {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: right;
+    color: #007AFF;
+}
+
+.login-screen {
+    max-width: 400px;
+    margin: 80px auto;
+    text-align: center;
+}
+
+.msg {
+    text-align: center;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.erro { color: red; }
+.sucesso { color: green; }
+
+#video { width: 100%; display: none; }
+
+@media print {
+    body * { visibility: hidden; }
+    #recibo, #recibo * { visibility: visible; }
+    #recibo { position: absolute; top: 0; left: 0; }
+}
+</style>
 </head>
+
 <body>
-    <!-- TELA DE LOGIN - FUNC 4 -->
-    <div id="loginScreen" class="login-screen card">
-        <h1>Peyem.POS MZ</h1>
-        <h3>Login do Funcionário</h3>
-        <input type="text" id="username" placeholder="Usuário: vasco ou caixa1">
-        <input type="password" id="password" placeholder="Senha: 1234 ou 0000">
-        <button id="btnLogin" class="btn-blue">Entrar</button>
-        <div id="loginMsg" class="msg erro"></div>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="login-screen card">
+    <h1>Peyem.POS MZ</h1>
+    <input type="text" id="username" placeholder="Usuário">
+    <input type="password" id="password" placeholder="Senha">
+    <button id="btnLogin" class="btn-blue">Entrar</button>
+    <div id="loginMsg" class="msg erro"></div>
+</div>
+
+<!-- APP -->
+<div id="appScreen" class="hidden">
+
+<div class="card">
+    <h1>Peyem.POS MZ</h1>
+    <span id="userName"></span>
+    <button id="btnLogout" class="btn-gray">Sair</button>
+</div>
+
+<div class="card">
+    <div id="msg" class="msg"></div>
+    <video id="video"></video>
+
+    <div class="flex">
+        <button id="btnCamera" class="btn-blue">Ligar Câmera</button>
+        <button id="btnRelatorio" class="btn-orange">Relatório</button>
     </div>
+</div>
 
-    <!-- TELA DO CAIXA -->
-    <div id="appScreen" class="hidden">
-        <div class="card header">
-            <h1>Peyem.POS MZ</h1>
-            <div>
-                <span id="userName"></span>
-                <button id="btnLogout" class="btn-gray" style="width:auto; padding:8px;">Sair</button>
-            </div>
-        </div>
-
-        <div class="card">
-            <div id="msg" class="msg erro"></div>
-            <video id="video"></video>
-            <div class="flex">
-                <button id="btnCamera" class="btn-blue">Ligar Câmera</button>
-                <button id="btnRelatorio" class="btn-orange">Vendas Hoje</button>
-            </div>
-            <button id="btnPararCamera" class="btn-gray hidden">Parar Câmera</button>
-        </div>
-
-        <div class="card">
-            <h3>Adicionar Produto</h3>
-            <div class="flex">
-                <input type="text" id="codigoManual" placeholder="Código de barras">
-                <button id="btnAddCodigo" class="btn-blue">Add</button>
-            </div>
-            <select id="selectProduto"></select>
-        </div>
-
-        <div class="card">
-            <h3>Carrinho</h3>
-            <div id="lista">Nenhum item ainda...</div>
-            <div class="total">Total: <span id="total">0.00</span> MT</div>
-            <button id="btnFinalizar" class="btn-green">Finalizar Venda</button>
-            <button id="btnLimpar" class="btn-red">Limpar Tudo</button>
-        </div>
+<div class="card">
+    <h3>Adicionar Produto</h3>
+    <div class="flex">
+        <input id="codigoManual" placeholder="Código">
+        <button id="btnAddCodigo" class="btn-blue">Add</button>
     </div>
+    <select id="selectProduto"></select>
+</div>
 
-    <!-- MODAL RELATÓRIO - FUNC 2 -->
-    <div id="modalRelatorio" class="hidden inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-lg max-w-md w-full">
-            <h3 text-xl font-bold mb-4>Relatório de Hoje</h3>
-            <div id="relatorioContent"></div>
-            <button onclick="document.getElementById('modalRelatorio').classList.add('hidden')" class="btn-gray mt-4 w-full">Fechar</button>
-        </div>
-    </div>
+<div class="card">
+    <h3>Carrinho</h3>
+    <div id="lista">Nenhum item...</div>
+    <div class="total">Total: <span id="total">0.00</span> MT</div>
+    <button id="btnFinalizar" class="btn-green">Finalizar</button>
+    <button id="btnLimpar" class="btn-red">Limpar</button>
+</div>
 
-    <!-- MODAL RECIBO - FUNC 1 -->
-    <div id="recibo" class="hidden"></div>
+</div>
+
+<div id="recibo"></div>
 
 <script>
-let token = localStorage.getItem('pos_token');
 let carrinho = [];
+let token = null;
 
-// 1. LÓGICA DE LOGIN - FUNC 4
-async function checkAuth() {
-    if (!token) return false;
-    try {
-        const res = await fetch('/api/me', { headers: { 'Authorization': token } });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        document.getElementById('userName').textContent = `Olá, ${data.name}`;
-        return true;
-    } catch {
-        localStorage.removeItem('pos_token');
-        token = null;
-        return false;
-    }
-}
+// LOGIN
+document.getElementById('btnLogin').onclick = () => {
+    const user = username.value;
+    const pass = password.value;
 
-async function init() {
-    if (await checkAuth()) {
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('appScreen').classList.remove('hidden');
+    if ((user === "vasco" && pass === "1234") || (user === "caixa1" && pass === "0000")) {
+        token = "logado";
+        loginScreen.classList.add("hidden");
+        appScreen.classList.remove("hidden");
+        userName.textContent = "Olá, " + user;
         carregarProdutos();
-    }
-}
-
-
-
-document.getElementById('btnLogin').addEventListener('click', async () => {
-    const usuario = document.getElementById('username').value;
-    const senha = document.getElementById('password').value;
-    
-    const res = await fetch('/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usuario, senha })
-    });
-    
-    const data = await res.json();
-    
-    if (res.ok) {
-        localStorage.setItem('pos_token', data.token);
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('appScreen').classList.remove('hidden');
-        document.getElementById('userName').textContent = `Olá, ${data.nome}`;
     } else {
-        alert(data.erro);
+        loginMsg.textContent = "Login inválido!";
     }
-});
+};
 
-document.getElementById('btnLogout').addEventListener('click', () => {
-    localStorage.removeItem('pos_token');
-    location.reload();
-});
+btnLogout.onclick = () => location.reload();
 
-// 2. FUNÇÕES DO POS
-const msg = document.getElementById('msg');
-const video = document.getElementById('video');
-const lista = document.getElementById('lista');
-const totalSpan = document.getElementById('total');
-const selectProduto = document.getElementById('selectProduto');
+// PRODUTOS MOCK (FUNCIONA SEM BACKEND)
+const produtos = [
+    { barcode: "111", name: "Arroz", price: 50, stock: 10 },
+    { barcode: "222", name: "Açúcar", price: 30, stock: 8 },
+    { barcode: "333", name: "Óleo", price: 80, stock: 5 }
+];
 
-// Carrega produtos com estoque - FUNC 3
-async function carregarProdutos() {
-    const res = await fetch('/api/products');
-    const produtos = await res.json();
-    selectProduto.innerHTML = '<option value="">Escolha da lista...</option>';
+function carregarProdutos() {
+    selectProduto.innerHTML = '<option value="">Selecionar...</option>';
     produtos.forEach(p => {
-        selectProduto.innerHTML += <option value="${p.barcode}">${p.name} - ${p.price.toFixed(2)} MT | Estoque: ${p.stock}</option>;
+        selectProduto.innerHTML += `<option value="${p.barcode}">
+        ${p.name} - ${p.price} MT (Stock: ${p.stock})
+        </option>`;
     });
 }
 
-// Câmera igual antes...
-document.getElementById('btnCamera').onclick = () => {
-    msg.textContent = 'A iniciar câmera...';
-    video.style.display = 'block';
-    Quagga.init({
-        inputStream: { target: video, constraints: { facingMode: "environment" } },
-        decoder: { readers: ["ean_reader", "ean_8_reader", "code_128_reader"] }
-    }, (err) => {
-        if (err) { msg.textContent = 'Erro câmera: ' + err.message; return; }
-        Quagga.start();
-    });
-};
-Quagga.onDetected((r) => { buscarEAddProduto(r.codeResult.code); Quagga.stop(); video.style.display = 'none'; });
+// ADICIONAR PRODUTO
+function addProduto(codigo) {
+    const p = produtos.find(x => x.barcode == codigo);
 
-// Add manual e por lista
-document.getElementById('btnAddCodigo').onclick = () => {
-    const cod = document.getElementById('codigoManual').value.trim();
-    if (cod) buscarEAddProduto(cod);
-    document.getElementById('codigoManual').value = '';
-};
-selectProduto.onchange = (e) => { if(e.target.value) buscarEAddProduto(e.target.value); e.target.value = ''; };
-
-async function buscarEAddProduto(codigo) {
-    const res = await fetch(`/api/products/${codigo}`);
-    if (!res.ok) { msg.textContent = 'Produto não encontrado'; return; }
-    const produto = await res.json();
-    if (produto.stock <= 0) { msg.textContent = 'Sem estoque!'; return; }
-    const item = carrinho.find(i => i.barcode === produto.barcode);
-    if (item) item.qtd++; else carrinho.push({...produto, qtd: 1});
-    renderCarrinho();
-    msg.textContent = '';
-}
-
-function renderCarrinho() {
-    if (carrinho.length === 0) {
-        lista.innerHTML = 'Nenhum item ainda...';
-        totalSpan.textContent = '0.00';
+    if (!p) {
+        msg.textContent = "Produto não encontrado";
         return;
     }
-    let html = '', total = 0;
-    carrinho.forEach((item, i) => {
-        const subtotal = item.price * item.qtd;
-        total += subtotal;
-        html += `<div class="item">
-            <div class="item-info"><strong>${item.name}</strong><br>${item.price.toFixed(2)} MT x ${item.qtd}</div>
-            <div class="item-qtd">
-                <button class="btn-gray" onclick="alterarQtd(${i}, -1)">-</button>
-                <span>${item.qtd}</span>
-                <button class="btn-blue" onclick="alterarQtd(${i}, 1)">+</button>
+
+    if (p.stock <= 0) {
+        msg.textContent = "Sem stock";
+        return;
+    }
+
+    const item = carrinho.find(i => i.barcode === codigo);
+    if (item) item.qtd++;
+    else carrinho.push({...p, qtd:1});
+
+    render();
+}
+
+// BOTÕES
+btnAddCodigo.onclick = () => {
+    addProduto(codigoManual.value);
+    codigoManual.value = "";
+};
+
+selectProduto.onchange = (e) => {
+    addProduto(e.target.value);
+};
+
+// RENDER
+function render() {
+    if (!carrinho.length) {
+        lista.innerHTML = "Nenhum item...";
+        total.textContent = "0.00";
+        return;
+    }
+
+    let html = "", totalG = 0;
+
+    carrinho.forEach((i, index) => {
+        let sub = i.price * i.qtd;
+        totalG += sub;
+
+        html += `
+        <div class="item">
+            <div>${i.name} (${i.qtd})</div>
+            <div>
+                <button onclick="alt(${index},-1)">-</button>
+                <button onclick="alt(${index},1)">+</button>
             </div>
         </div>`;
     });
+
     lista.innerHTML = html;
-    totalSpan.textContent = total.toFixed(2);
+    total.textContent = totalG.toFixed(2);
 }
-window.alterarQtd = (i, d) => { carrinho[i].qtd += d; if (carrinho[i].qtd <= 0) carrinho.splice(i, 1); renderCarrinho(); };
 
-document.getElementById('btnLimpar').onclick = () => { carrinho = []; renderCarrinho(); };
-
-// FINALIZAR VENDA + IMPRIMIR RECIBO - FUNC 1
-document.getElementById('btnFinalizar').onclick = async () => {
-    if (carrinho.length === 0) return;
-    const total = carrinho.reduce((s, i) => s + i.price * i.qtd, 0);
-    const res = await fetch('/api/sales', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': token },
-        body: JSON.stringify({ items: carrinho, total })
-    });
-    const venda = await res.json();
-    if (res.ok) {
-        imprimirRecibo(venda); // FUNC 1
-        carrinho = [];
-        renderCarrinho();
-        carregarProdutos(); // Atualiza estoque na tela
-    } else {
-        msg.textContent = venda.error;
-    }
+window.alt = (i, d) => {
+    carrinho[i].qtd += d;
+    if (carrinho[i].qtd <= 0) carrinho.splice(i,1);
+    render();
 };
 
-function imprimirRecibo(venda) { // FUNC 1
-    const reciboDiv = document.getElementById('recibo');
-    let itensHtml = venda.items.map(i => <tr><td>${i.name}</td><td>${i.qtd}</td><td>${i.price.toFixed(2)}</td><td>${(i.price*i.qtd).toFixed(2)}</td></tr>).join('');
-    reciboDiv.innerHTML = `
-        <div style="padding:20px; font-family:monospace;">
-            <h2 style="text-align:center;">Peyem.POS MZ</h2>
-            <p>Venda #${venda.id} | ${new Date(venda.date).toLocaleString('pt-MZ')}</p>
-            <p>Atendente: ${venda.user}</p>
-            <hr>
-            <table width="100%"><tr><th>Item</th><th>Qtd</th><th>Preço</th><th>Total</th></tr>${itensHtml}</table>
-            <hr>
-            <h3 style="text-align:right;">TOTAL: ${venda.total.toFixed(2)} MT</h3>
-            <p style="text-align:center;">Obrigado pela preferência!</p>
-        </div>`;
+btnLimpar.onclick = () => {
+    carrinho = [];
+    render();
+};
+
+// FINALIZAR
+btnFinalizar.onclick = () => {
+    if (!carrinho.length) return;
+
+    let totalG = carrinho.reduce((s,i)=>s+i.price*i.qtd,0);
+
+    let html = carrinho.map(i => `
+    <tr>
+    <td>${i.name}</td>
+    <td>${i.qtd}</td>
+    <td>${i.price}</td>
+    </tr>`).join("");
+
+    recibo.innerHTML = `
+    <div style="font-family:monospace">
+    <h2>Peyem.POS</h2>
+    <table>${html}</table>
+    <h3>Total: ${totalG} MT</h3>
+    </div>`;
+
     window.print();
-}
 
-// RELATÓRIO VENDAS DO DIA - FUNC 2
-document.getElementById('btnRelatorio').onclick = async () => {
-    const res = await fetch('/api/sales/today', { headers: { 'Authorization': token } });
-    const data = await res.json();
-    let vendasHtml = data.vendas.map(v => <p>#${v.id} - ${new Date(v.date).toLocaleTimeString('pt-MZ')} - ${v.total.toFixed(2)} MT - ${v.user}</p>).join('');
-    document.getElementById('relatorioContent').innerHTML = `
-        <p><strong>Vendas hoje:</strong> ${data.qtdVendas}</p>
-        <p><strong>Total do dia:</strong> ${data.totalDia.toFixed(2)} MT</p>
-        <hr>${vendasHtml || '<p>Nenhuma venda hoje ainda.</p>'}`;
-    document.getElementById('modalRelatorio').classList.remove('hidden');
+    carrinho = [];
+    render();
 };
 
-init(); // Inicia o app
+// CÂMERA
+btnCamera.onclick = () => {
+    video.style.display = "block";
+
+    Quagga.init({
+        inputStream: { target: video },
+        decoder: { readers: ["ean_reader"] }
+    }, err => {
+        if (!err) Quagga.start();
+    });
+};
+
+Quagga.onDetected(r => {
+    addProduto(r.codeResult.code);
+    Quagga.stop();
+    video.style.display = "none";
+});
 </script>
+
 </body>
 </html>
