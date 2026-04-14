@@ -61,6 +61,8 @@ app.get('/api/products/:barcode', (req, res) => {
     else res.status(404).json({ error: 'Produto não encontrado' });
 });
 
+
+
 // ROTA DE VENDA - ATUALIZA ESTOQUE - FUNCIONALIDADE 3
 app.post('/api/sales', checkLogin, (req, res) => {
     const { items, total } = req.body;
