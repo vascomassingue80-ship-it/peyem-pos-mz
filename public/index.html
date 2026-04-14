@@ -117,21 +117,21 @@ async function checkAuth() {
     }
 }
 
-//async function init() {
-    //if (await checkAuth()) {
+async function init() {
+    if (await checkAuth()) {
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('appScreen').classList.remove('hidden');
         carregarProdutos();
-    //}
-//}
+    }
+}
 
 document.getElementById('btnLogin').addEventListener('click', async () => {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
-    const res = await fetch('/api/login', {
+    const res = await fetch('/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ usuario, senha })
     });
     const data = await res.json();
     if (res.ok) {
@@ -273,7 +273,7 @@ document.getElementById('btnRelatorio').onclick = async () => {
     document.getElementById('modalRelatorio').classList.remove('hidden');
 };
 
-//init(); // Inicia o app
+init(); // Inicia o app
 </script>
 </body>
 </html>
