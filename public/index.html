@@ -1,107 +1,279 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peyem.POS MZ - by Vasco</title>
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <title>Peyem.POS MZ</title>
+    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 15px; background: #f5f5f5; }
-       .card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        #reader { width: 100%; border: 2px solid #ddd; border-radius: 8px; min-height: 250px; }
-        button { width: 100%; padding: 15px; font-size: 18px; border: none; border-radius: 8px; margin-top: 10px; cursor: pointer; }
-        #btn-scan { background: #007bff; color: white; }
-        #btn-stop { background: #dc3545; color: white; display: none; }
-       .item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-       .total { font-size: 24px; font-weight: bold; text-align: right; margin-top: 15px; }
-        h1 { text-align: center; color: #333; }
-       .vazio { color: #888; text-align: center; }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; margin: 0; padding: 10px; background: #f5f5f5; }
+      .card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        h1, h3 { margin: 10px 0; }
+        #video { width: 100%; border-radius: 8px; display: none; }
+        button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; margin: 5px 0; font-weight: bold; cursor: pointer; }
+      .btn-blue { background: #007AFF; color: white; }
+      .btn-green { background: #34C759; color: white; }
+      .btn-red { background: #FF3B30; color: white; }
+      .btn-gray { background: #8E8E93; color: white; }
+      .btn-orange { background: #FF9500; color: white; }
+        input, select { width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ddd; border-radius: 8px; margin: 5px 0; }
+      .item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+      .item-info { flex: 1; }
+      .item-qtd { display: flex; align-items: center; gap: 10px; }
+      .item-qtd button { width: 30px; height: 30px; padding: 0; margin: 0; }
+      .total { font-size: 24px; font-weight: bold; text-align: right; }
+      .msg { font-weight: bold; text-align: center; margin: 10px 0; }
+      .erro { color: #FF3B30; }
+      .sucesso { color: #34C759; }
+      .flex { display: flex; gap: 10px; }
+      .flex > * { flex: 1; }
+      .hidden { display: none; }
+      .login-screen { max-width: 400px; margin: 50px auto; }
+      .header { display: flex; justify-content: space-between; align-items: center; }
+      .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+      .modal-content { background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; max-height: 80%; overflow-y: auto; }
+       @media print { body * { visibility: hidden; } #recibo, #recibo * { visibility: visible; } #recibo { position: absolute; left: 0; top: 0; width: 100%; } }
     </style>
 </head>
 <body>
-    <h1>Peyem.POS MZ</h1>
-
-    <div class="card">
-        <div id="reader"></div>
-        <button id="btn-scan" onclick="iniciarScan()">Ligar Câmera e Escanear</button>
-        <button id="btn-stop" onclick="pararScan()">Parar Câmera</button>
+    <!-- TELA DE LOGIN - FUNC 4 -->
+    <div id="loginScreen" class="login-screen card">
+        <h1>Peyem.POS MZ</h1>
+        <h3>Login do Funcionário</h3>
+        <input type="text" id="username" placeholder="Usuário: vasco ou caixa1">
+        <input type="password" id="password" placeholder="Senha: 1234 ou 0000">
+        <button id="btnLogin" class="btn-blue">Entrar</button>
+        <div id="loginMsg" class="msg erro"></div>
     </div>
 
-    <div class="card">
-        <h3>Scanned Items</h3>
-        <div id="lista-produtos">
-            <p class="vazio">Nenhum item ainda...</p>
+    <!-- TELA DO CAIXA -->
+    <div id="appScreen" class="hidden">
+        <div class="card header">
+            <h1>Peyem.POS MZ</h1>
+            <div>
+                <span id="userName"></span>
+                <button id="btnLogout" class="btn-gray" style="width:auto; padding:8px;">Sair</button>
+            </div>
         </div>
-        <div class="total">Total: <span id="total">0.00</span> MT</div>
-        <button style="background: #28a745; color: white;">Review Order</button>
+
+        <div class="card">
+            <div id="msg" class="msg erro"></div>
+            <video id="video"></video>
+            <div class="flex">
+                <button id="btnCamera" class="btn-blue">Ligar Câmera</button>
+                <button id="btnRelatorio" class="btn-orange">Vendas Hoje</button>
+            </div>
+            <button id="btnPararCamera" class="btn-gray hidden">Parar Câmera</button>
+        </div>
+
+        <div class="card">
+            <h3>Adicionar Produto</h3>
+            <div class="flex">
+                <input type="text" id="codigoManual" placeholder="Código de barras">
+                <button id="btnAddCodigo" class="btn-blue">Add</button>
+            </div>
+            <select id="selectProduto"></select>
+        </div>
+
+        <div class="card">
+            <h3>Carrinho</h3>
+            <div id="lista">Nenhum item ainda...</div>
+            <div class="total">Total: <span id="total">0.00</span> MT</div>
+            <button id="btnFinalizar" class="btn-green">Finalizar Venda</button>
+            <button id="btnLimpar" class="btn-red">Limpar Tudo</button>
+        </div>
     </div>
+
+    <!-- MODAL RELATÓRIO - FUNC 2 -->
+    <div id="modalRelatorio" class="modal hidden">
+        <div class="modal-content">
+            <h3>Relatório de Hoje</h3>
+            <div id="relatorioContent"></div>
+            <button onclick="document.getElementById('modalRelatorio').classList.add('hidden')" class="btn-gray">Fechar</button>
+        </div>
+    </div>
+
+    <!-- MODAL RECIBO - FUNC 1 -->
+    <div id="recibo" class="hidden"></div>
 
 <script>
-    const html5QrCode = new Html5Qrcode("reader");
-    let carrinho = [];
-    let total = 0;
+let token = localStorage.getItem('pos_token');
+let carrinho = [];
 
-    function iniciarScan() {
-        document.getElementById('btn-scan').style.display = 'none';
-        document.getElementById('btn-stop').style.display = 'block';
-
-        html5QrCode.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 250, height: 150 } },
-            (codigoLido) => {
-                html5QrCode.pause();
-                buscarProduto(codigoLido);
-                setTimeout(() => html5QrCode.resume(), 2000);
-            },
-            (erro) => {}
-        ).catch(err => {
-            alert("Erro ao abrir câmera: " + err);
-            pararScan();
-        });
+// 1. LÓGICA DE LOGIN - FUNC 4
+async function checkAuth() {
+    if (!token) return false;
+    try {
+        const res = await fetch('/api/me', { headers: { 'Authorization': token } });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        document.getElementById('userName').textContent = Olá, ${data.name};
+        return true;
+    } catch {
+        localStorage.removeItem('pos_token');
+        token = null;
+        return false;
     }
+}
 
-    function pararScan() {
-        html5QrCode.stop().then(() => {
-            document.getElementById('btn-scan').style.display = 'block';
-            document.getElementById('btn-stop').style.display = 'none';
-        }).catch(err => console.log(err));
+async function init() {
+    if (await checkAuth()) {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('appScreen').classList.remove('hidden');
+        carregarProdutos();
     }
+}
 
-    // AQUI CONECTA COM TEU BACKEND
-    async function buscarProduto(codigo) {
-        try {
-            const resposta = await fetch(/produto/${codigo});
-            if (resposta.ok) {
-                const produto = await resposta.json();
-                adicionarAoCarrinho(produto);
-            } else {
-                alert(Produto não cadastrado: ${codigo});
-            }
-        } catch (erro) {
-            alert("Erro ao conectar com servidor");
-        }
+document.getElementById('btnLogin').addEventListener('click', async () => {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (res.ok) {
+        token = data.token;
+        localStorage.setItem('pos_token', token);
+        init();
+    } else {
+        document.getElementById('loginMsg').textContent = data.error;
     }
+});
 
-    function adicionarAoCarrinho(produto) {
-        carrinho.push(produto);
-        total += produto.preco;
-        atualizarTela();
+document.getElementById('btnLogout').addEventListener('click', () => {
+    localStorage.removeItem('pos_token');
+    location.reload();
+});
+
+// 2. FUNÇÕES DO POS
+const msg = document.getElementById('msg');
+const video = document.getElementById('video');
+const lista = document.getElementById('lista');
+const totalSpan = document.getElementById('total');
+const selectProduto = document.getElementById('selectProduto');
+
+// Carrega produtos com estoque - FUNC 3
+async function carregarProdutos() {
+    const res = await fetch('/api/products');
+    const produtos = await res.json();
+    selectProduto.innerHTML = '<option value="">Escolha da lista...</option>';
+    produtos.forEach(p => {
+        selectProduto.innerHTML += <option value="${p.barcode}">${p.name} - ${p.price.toFixed(2)} MT | Estoque: ${p.stock}</option>;
+    });
+}
+
+// Câmera igual antes...
+document.getElementById('btnCamera').onclick = () => {
+    msg.textContent = 'A iniciar câmera...';
+    video.style.display = 'block';
+    Quagga.init({
+        inputStream: { target: video, constraints: { facingMode: "environment" } },
+        decoder: { readers: ["ean_reader", "ean_8_reader", "code_128_reader"] }
+    }, (err) => {
+        if (err) { msg.textContent = 'Erro câmera: ' + err.message; return; }
+        Quagga.start();
+    });
+};
+Quagga.onDetected((r) => { buscarEAddProduto(r.codeResult.code); Quagga.stop(); video.style.display = 'none'; });
+
+// Add manual e por lista
+document.getElementById('btnAddCodigo').onclick = () => {
+    const cod = document.getElementById('codigoManual').value.trim();
+    if (cod) buscarEAddProduto(cod);
+    document.getElementById('codigoManual').value = '';
+};
+selectProduto.onchange = (e) => { if(e.target.value) buscarEAddProduto(e.target.value); e.target.value = ''; };
+
+async function buscarEAddProduto(codigo) {
+    const res = await fetch(/api/products/${codigo});
+    if (!res.ok) { msg.textContent = 'Produto não encontrado'; return; }
+    const produto = await res.json();
+    if (produto.stock <= 0) { msg.textContent = 'Sem estoque!'; return; }
+    const item = carrinho.find(i => i.barcode === produto.barcode);
+    if (item) item.qtd++; else carrinho.push({...produto, qtd: 1});
+    renderCarrinho();
+    msg.textContent = '';
+}
+
+function renderCarrinho() {
+    if (carrinho.length === 0) {
+        lista.innerHTML = 'Nenhum item ainda...';
+        totalSpan.textContent = '0.00';
+        return;
     }
+    let html = '', total = 0;
+    carrinho.forEach((item, i) => {
+        const subtotal = item.price * item.qtd;
+        total += subtotal;
+        html += `<div class="item">
+            <div class="item-info"><strong>${item.name}</strong><br>${item.price.toFixed(2)} MT x ${item.qtd}</div>
+            <div class="item-qtd">
+                <button class="btn-gray" onclick="alterarQtd(${i}, -1)">-</button>
+                <span>${item.qtd}</span>
+                <button class="btn-blue" onclick="alterarQtd(${i}, 1)">+</button>
+            </div>
+        </div>`;
+    });
+    lista.innerHTML = html;
+    totalSpan.textContent = total.toFixed(2);
+}
+window.alterarQtd = (i, d) => { carrinho[i].qtd += d; if (carrinho[i].qtd <= 0) carrinho.splice(i, 1); renderCarrinho(); };
 
-    function atualizarTela() {
-        const lista = document.getElementById('lista-produtos');
-        const totalSpan = document.getElementById('total');
+document.getElementById('btnLimpar').onclick = () => { carrinho = []; renderCarrinho(); };
 
-        lista.innerHTML = '';
-        carrinho.forEach(item => {
-            lista.innerHTML += <div class="item"><span>${item.nome}</span> <span>${item.preco.toFixed(2)} MT</span></div>;
-        });
-
-        totalSpan.innerText = total.toFixed(2);
-        if (carrinho.length === 0) {
-            lista.innerHTML = '<p class="vazio">Nenhum item ainda...</p>';
-        }
+// FINALIZAR VENDA + IMPRIMIR RECIBO - FUNC 1
+document.getElementById('btnFinalizar').onclick = async () => {
+    if (carrinho.length === 0) return;
+    const total = carrinho.reduce((s, i) => s + i.price * i.qtd, 0);
+    const res = await fetch('/api/sales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': token },
+        body: JSON.stringify({ items: carrinho, total })
+    });
+    const venda = await res.json();
+    if (res.ok) {
+        imprimirRecibo(venda); // FUNC 1
+        carrinho = [];
+        renderCarrinho();
+        carregarProdutos(); // Atualiza estoque na tela
+    } else {
+        msg.textContent = venda.error;
     }
+};
+
+function imprimirRecibo(venda) { // FUNC 1
+    const reciboDiv = document.getElementById('recibo');
+    let itensHtml = venda.items.map(i => <tr><td>${i.name}</td><td>${i.qtd}</td><td>${i.price.toFixed(2)}</td><td>${(i.price*i.qtd).toFixed(2)}</td></tr>).join('');
+    reciboDiv.innerHTML = `
+        <div style="padding:20px; font-family:monospace;">
+            <h2 style="text-align:center;">Peyem.POS MZ</h2>
+            <p>Venda #${venda.id} | ${new Date(venda.date).toLocaleString('pt-MZ')}</p>
+            <p>Atendente: ${venda.user}</p>
+            <hr>
+            <table width="100%"><tr><th>Item</th><th>Qtd</th><th>Preço</th><th>Total</th></tr>${itensHtml}</table>
+            <hr>
+            <h3 style="text-align:right;">TOTAL: ${venda.total.toFixed(2)} MT</h3>
+            <p style="text-align:center;">Obrigado pela preferência!</p>
+        </div>`;
+    window.print();
+}
+
+// RELATÓRIO VENDAS DO DIA - FUNC 2
+document.getElementById('btnRelatorio').onclick = async () => {
+    const res = await fetch('/api/sales/today', { headers: { 'Authorization': token } });
+    const data = await res.json();
+    let vendasHtml = data.vendas.map(v => <p>#${v.id} - ${new Date(v.date).toLocaleTimeString('pt-MZ')} - ${v.total.toFixed(2)} MT - ${v.user}</p>).join('');
+    document.getElementById('relatorioContent').innerHTML = `
+        <p><strong>Vendas hoje:</strong> ${data.qtdVendas}</p>
+        <p><strong>Total do dia:</strong> ${data.totalDia.toFixed(2)} MT</p>
+        <hr>${vendasHtml || '<p>Nenhuma venda hoje ainda.</p>'}`;
+    document.getElementById('modalRelatorio').classList.remove('hidden');
+};
+
+init(); // Inicia o app
 </script>
 </body>
 </html>
