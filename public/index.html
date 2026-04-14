@@ -143,7 +143,7 @@ document.getElementById('btnLogin').addEventListener('click', async () => {
         localStorage.setItem('pos_token', data.token);
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('appScreen').classList.remove('hidden');
-        document.getElementById('userName').textContent = Olá, ${data.nome};
+        document.getElementById('userName').textContent = `Olá, ${data.nome}`;
     } else {
         alert(data.erro);
     }
@@ -194,7 +194,7 @@ document.getElementById('btnAddCodigo').onclick = () => {
 selectProduto.onchange = (e) => { if(e.target.value) buscarEAddProduto(e.target.value); e.target.value = ''; };
 
 async function buscarEAddProduto(codigo) {
-    const res = await fetch(/api/products/${codigo});
+    const res = await fetch(`/api/products/${codigo}`);
     if (!res.ok) { msg.textContent = 'Produto não encontrado'; return; }
     const produto = await res.json();
     if (produto.stock <= 0) { msg.textContent = 'Sem estoque!'; return; }
